@@ -86,16 +86,14 @@ module PlaypathRails
 
       request = request_class.new(uri)
       request['Content-Type'] = 'application/json'
-      
+
       # Set authentication header
       api_key = configuration.api_key_for(endpoint_type)
       raise AuthenticationError, 'API key not configured' unless api_key
-      
+
       request['X-Api-Key'] = api_key
 
-      if body
-        request.body = JSON.generate(body)
-      end
+      request.body = JSON.generate(body) if body
 
       request
     end
@@ -104,6 +102,7 @@ module PlaypathRails
       case response.code.to_i
       when 200, 201
         return nil if response.body.nil? || response.body.empty?
+
         JSON.parse(response.body)
       when 204
         nil
@@ -116,9 +115,10 @@ module PlaypathRails
         error_data = parse_error_response(response)
         if error_data[:message]&.include?('Trial limit')
           raise TrialLimitError.new(error_data[:message], status_code: 403, response_body: response.body)
-        else
-          raise APIError.new('Forbidden', status_code: 403, response_body: response.body)
         end
+
+        raise APIError.new('Forbidden', status_code: 403, response_body: response.body)
+
       when 404
         raise NotFoundError.new('Resource not found', status_code: 404, response_body: response.body)
       when 422
@@ -129,15 +129,17 @@ module PlaypathRails
         raise RateLimitError.new('Rate limit exceeded', status_code: 429, response_body: response.body)
       when 502
         error_data = parse_error_response(response)
-        raise ExternalServiceError.new(error_data[:message] || 'Bad Gateway', status_code: 502, response_body: response.body)
+        raise ExternalServiceError.new(error_data[:message] || 'Bad Gateway', status_code: 502,
+                                                                              response_body: response.body)
       else
-        raise APIError.new("HTTP #{response.code}: #{response.message}", status_code: response.code.to_i, response_body: response.body)
+        raise APIError.new("HTTP #{response.code}: #{response.message}", status_code: response.code.to_i,
+                                                                         response_body: response.body)
       end
     end
 
     def parse_error_response(response)
       return { message: 'Unknown error' } if response.body.nil? || response.body.empty?
-      
+
       JSON.parse(response.body, symbolize_names: true)
     rescue JSON::ParserError
       { message: response.body }

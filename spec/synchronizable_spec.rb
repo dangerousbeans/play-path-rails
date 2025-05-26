@@ -6,30 +6,30 @@ RSpec.describe PlaypathRails::Synchronizable do
   let(:dummy_class) do
     Class.new do
       include PlaypathRails::Synchronizable
-      
+
       attr_accessor :id, :title, :content, :url, :tags, :playpath_item_id
-      
+
       def initialize(attributes = {})
         attributes.each { |key, value| send("#{key}=", value) }
       end
-      
-      def saved_change_to_attribute?(attr)
+
+      def saved_change_to_attribute?(_attr)
         true # Simulate that attributes have changed
       end
-      
+
       def update_column(column, value)
         send("#{column}=", value)
       end
-      
+
       def read_attribute(attr)
         send(attr)
       end
-      
+
       def respond_to_missing?(method_name, include_private = false)
         method_name.to_s.end_with?('=') || super
       end
-      
-      def method_missing(method_name, *args, &block)
+
+      def method_missing(method_name, *args)
         if method_name.to_s.end_with?('=')
           instance_variable_set("@#{method_name.to_s.chomp('=')}", args.first)
         else
@@ -64,7 +64,7 @@ RSpec.describe PlaypathRails::Synchronizable do
   context 'when playpath_sync is configured' do
     before do
       klass.playpath_sync(
-        only: [:title, :content],
+        only: %i[title content],
         title_field: :title,
         text_field: :content,
         tags: ['article']
@@ -73,7 +73,7 @@ RSpec.describe PlaypathRails::Synchronizable do
 
     it 'stores options for syncing' do
       expected_options = {
-        only: [:title, :content],
+        only: %i[title content],
         title_field: :title,
         text_field: :content,
         url_field: nil,
@@ -104,7 +104,7 @@ RSpec.describe PlaypathRails::Synchronizable do
         title: 'Test Article',
         content: 'This is test content',
         url: 'https://example.com',
-        tags: ['tag1', 'tag2']
+        tags: %w[tag1 tag2]
       )
     end
 
@@ -120,7 +120,7 @@ RSpec.describe PlaypathRails::Synchronizable do
 
     it 'builds correct item data' do
       data = instance.send(:build_item_data)
-      
+
       expect(data[:title]).to eq('Test Article')
       expect(data[:text]).to eq('This is test content')
       expect(data[:url]).to eq('https://example.com')

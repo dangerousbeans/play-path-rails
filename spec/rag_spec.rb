@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe PlaypathRails::RAG do
   let(:mock_client) { double('client') }
-  
+
   before do
     allow(PlaypathRails).to receive(:client).and_return(mock_client)
   end
@@ -16,14 +16,14 @@ RSpec.describe PlaypathRails::RAG do
 
     it 'calls the client chat method with correct parameters' do
       expect(mock_client).to receive(:chat).with(message: message, history: history).and_return(expected_response)
-      
+
       result = described_class.chat(message: message, history: history)
       expect(result).to eq(expected_response)
     end
 
     it 'works without history' do
       expect(mock_client).to receive(:chat).with(message: message, history: []).and_return(expected_response)
-      
+
       result = described_class.chat(message: message)
       expect(result).to eq(expected_response)
     end
@@ -35,7 +35,7 @@ RSpec.describe PlaypathRails::RAG do
 
     it 'returns just the reply text' do
       expect(mock_client).to receive(:chat).with(message: message, history: []).and_return(response)
-      
+
       result = described_class.ask(message)
       expect(result).to eq('Rugby is a sport...')
     end
@@ -62,7 +62,7 @@ RSpec.describe PlaypathRails::RAG do
 
     it 'handles single message' do
       result = described_class.build_history('What is rugby?')
-      
+
       expected = [
         { 'role' => 'user', 'text' => 'What is rugby?' }
       ]

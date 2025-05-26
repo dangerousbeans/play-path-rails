@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "playpath_rails/version"
-require_relative "playpath_rails/errors"
-require_relative "playpath_rails/client"
-require_relative "playpath_rails/synchronizable"
-require_relative "playpath_rails/rag"
+require_relative 'playpath_rails/version'
+require_relative 'playpath_rails/errors'
+require_relative 'playpath_rails/client'
+require_relative 'playpath_rails/synchronizable'
+require_relative 'playpath_rails/rag'
 
 module PlaypathRails
   class Error < StandardError; end
@@ -43,7 +43,7 @@ module PlaypathRails
     def initialize
       @api_key = nil
       @embeddings_api_key = nil
-      @base_url = "https://playpath.io"
+      @base_url = 'https://playpath.io'
     end
 
     # Get the appropriate API key for the request type

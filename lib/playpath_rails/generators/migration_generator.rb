@@ -9,12 +9,12 @@ module PlaypathRails
       include ActiveRecord::Generators::Migration
 
       source_root File.expand_path('templates', __dir__)
-      
-      argument :model_name, type: :string, desc: "The model to add PlayPath synchronization to"
+
+      argument :model_name, type: :string, desc: 'The model to add PlayPath synchronization to'
 
       def create_migration_file
-        migration_template 'add_playpath_item_id_migration.rb.erb', 
-                          "db/migrate/add_playpath_item_id_to_#{table_name}.rb"
+        migration_template 'add_playpath_item_id_migration.rb.erb',
+                           "db/migrate/add_playpath_item_id_to_#{table_name}.rb"
       end
 
       private

@@ -9,12 +9,8 @@ module PlaypathRails
 
     included do
       # Only add callbacks if the host class supports them
-      if respond_to?(:after_commit)
-        after_commit :playpath_sync!, on: [:create, :update]
-      end
-      if respond_to?(:before_destroy)
-        before_destroy :playpath_delete!
-      end
+      after_commit :playpath_sync!, on: %i[create update] if respond_to?(:after_commit)
+      before_destroy :playpath_delete! if respond_to?(:before_destroy)
     end
 
     class_methods do
@@ -49,7 +45,7 @@ module PlaypathRails
 
       begin
         item_data = build_item_data
-        
+
         if playpath_item_id && playpath_item_id != 0
           # Update existing item
           PlaypathRails.client.update_item(playpath_item_id, **item_data)
@@ -57,11 +53,9 @@ module PlaypathRails
           # Create new item
           response = PlaypathRails.client.create_item(**item_data)
           # Store the item ID if the model supports it
-          if respond_to?(:playpath_item_id=) && response&.dig('id')
-            update_column(:playpath_item_id, response['id'])
-          end
+          update_column(:playpath_item_id, response['id']) if respond_to?(:playpath_item_id=) && response&.dig('id')
         end
-        
+
         true
       rescue PlaypathRails::Error => e
         # Log the error but don't raise it to avoid breaking the application
@@ -95,6 +89,7 @@ module PlaypathRails
     # Get the PlayPath item ID for this record
     def playpath_item_id
       return nil unless respond_to?(:playpath_item_id)
+
       read_attribute(:playpath_item_id)
     end
 
@@ -111,9 +106,7 @@ module PlaypathRails
       return false unless title_value && !title_value.to_s.empty?
 
       # If 'only' fields are specified, check if any of them changed
-      if options[:only] && options[:only].any?
-        return options[:only].any? { |field| saved_change_to_attribute?(field) }
-      end
+      return options[:only].any? { |field| saved_change_to_attribute?(field) } if options[:only]&.any?
 
       true
     end
@@ -140,10 +133,10 @@ module PlaypathRails
 
       # Tags handling
       tags = []
-      
+
       # Add static tags
-      tags.concat(options[:tags]) if options[:tags] && options[:tags].any?
-      
+      tags.concat(options[:tags]) if options[:tags]&.any?
+
       # Add dynamic tags from field
       if options[:tags_field] && respond_to?(options[:tags_field])
         field_tags = send(options[:tags_field])

@@ -9,7 +9,7 @@ RSpec.describe PlaypathRails::Client do
       config.base_url = 'https://test.playpath.io'
     end
   end
-  
+
   subject(:client) { described_class.new(configuration) }
 
   describe '#initialize' do
@@ -60,9 +60,9 @@ RSpec.describe PlaypathRails::Client do
 
   describe '#build_request' do
     it 'raises error for unsupported HTTP method' do
-      expect {
+      expect do
         client.send(:build_request, :invalid, URI('https://test.com'), nil, :items)
-      }.to raise_error(ArgumentError, 'Unsupported HTTP method: invalid')
+      end.to raise_error(ArgumentError, 'Unsupported HTTP method: invalid')
     end
   end
 
@@ -76,9 +76,9 @@ RSpec.describe PlaypathRails::Client do
       end
 
       it 'raises AuthenticationError' do
-        expect {
+        expect do
           client.send(:build_request, :get, URI('https://test.com'), nil, :items)
-        }.to raise_error(PlaypathRails::AuthenticationError, 'API key not configured')
+        end.to raise_error(PlaypathRails::AuthenticationError, 'API key not configured')
       end
     end
 
