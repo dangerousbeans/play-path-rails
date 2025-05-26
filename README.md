@@ -1,16 +1,17 @@
 <!--- @ playpath_rails README -->
 # PlaypathRails
 
-A Ruby on Rails gem that extends ActiveRecord to enable synchronization between your application data and the PlayPath.io Retrieval-Augmented Generation (RAG) service. With PlaypathRails, you can automatically keep your database records in sync with PlayPath's Items API for powerful retrieval and search capabilities.
+A Ruby on Rails gem that provides seamless integration between Rails applications and the PlayPath.io API. Automatically sync your ActiveRecord models to PlayPath's knowledge base and leverage RAG (Retrieval-Augmented Generation) capabilities.
 
 [![Gem Version](https://badge.fury.io/rb/playpath_rails.svg)](https://badge.fury.io/rb/playpath_rails) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
 
-- Seamless integration with ActiveRecord models
-- Automatic synchronization of create, update, and destroy events
-- Configurable indexing strategies
-- Support for custom field mappings
+- **Automatic Model Synchronization**: Sync ActiveRecord models to PlayPath.io Items API
+- **RAG Chat Integration**: Query your knowledge base using AI-powered chat
+- **Flexible Configuration**: Support for both regular and embeddings-only API keys
+- **Error Handling**: Comprehensive error handling with specific exception types
+- **Rails Generators**: Easy setup with migration generators
 
 ## Installation
 
@@ -34,41 +35,162 @@ gem install playpath_rails
 
 ## Configuration
 
-Before using PlaypathRails, you need to configure your API credentials and any optional settings. Create an initializer at `config/initializers/playpath_rails.rb`:
+Configure PlaypathRails in an initializer (e.g., `config/initializers/playpath_rails.rb`):
 
 ```ruby
 PlaypathRails.configure do |config|
-  config.api_key = Rails.application.credentials.playpath[:api_key] || ENV['PLAYPATH_API_KEY']
-  # Optionally customize the base URL (defaults to https://api.playpath.io)
-  # config.base_url = 'https://custom-api.playpath.io'
+  config.api_key = ENV['PLAYPATH_API_KEY']                    # Full access API key
+  config.embeddings_api_key = ENV['PLAYPATH_EMBEDDINGS_KEY']  # Optional: RAG-only key
+  config.base_url = 'https://playpath.io'                     # Optional: custom base URL
 end
 ```
 
-## Usage
+## Model Synchronization
 
-Include the `Synchronizable` module in any ActiveRecord model you wish to sync:
+### Basic Setup
+
+1. Add the `playpath_item_id` column to your model:
+
+```bash
+rails generate playpath_rails:migration Article
+rails db:migrate
+```
+
+2. Include the `Synchronizable` module in your model:
 
 ```ruby
 class Article < ApplicationRecord
   include PlaypathRails::Synchronizable
-
-  # Automatically sync all attributes on create/update/destroy
-  playpath_sync
-
-  # Or customize fields and index name:
-  # playpath_sync only: %i[title content], index: 'articles_index'
+  
+  # Configure synchronization
+  playpath_sync(
+    title_field: :title,        # Required: field to use as title
+    text_field: :content,       # Optional: field to use as text content
+    url_field: :permalink,      # Optional: field to use as URL
+    tags_field: :tag_list,      # Optional: field containing tags
+    tags: ['article', 'blog']   # Optional: static tags to apply
+  )
 end
 ```
 
-Once configured, saving, updating, or destroying records will automatically propagate changes to your PlayPath.io account.
+### Synchronization Options
 
-You can also manually trigger synchronization:
+- `title_field`: The field to use as the item title (required, defaults to `:title`)
+- `text_field`: The field to use as the item text content (optional)
+- `url_field`: The field to use as the item URL (optional)
+- `tags_field`: The field containing tags (can be Array or comma-separated String)
+- `tags`: Static tags to apply to all items (Array)
+- `only`: Array of fields that trigger sync when changed (optional)
+
+### Manual Synchronization
 
 ```ruby
-article = Article.find(1)
-article.playpath_sync!   # Push current state
-article.playpath_delete! # Remove from PlayPath index
+# Manually sync a record
+article.sync_to_playpath!
+
+# Check if a record is synced
+article.playpath_item_id.present?
 ```
+
+## RAG Chat API
+
+### Simple Usage
+
+```ruby
+# Ask a simple question
+response = PlaypathRails::RAG.ask("What is rugby coaching?")
+puts response
+
+# Get detailed response with usage info
+result = PlaypathRails::RAG.chat(message: "How do I improve my scrum technique?")
+puts result['reply']
+puts "Usage: #{result['usage']}/#{result['limit']}" if result['usage']
+```
+
+### Conversation History
+
+```ruby
+# Build conversation history
+history = PlaypathRails::RAG.build_history(
+  "What is rugby?",
+  "Rugby is a team sport...",
+  "How many players are on a team?"
+)
+
+# Continue conversation
+response = PlaypathRails::RAG.chat(
+  message: "What about the rules?",
+  history: history
+)
+```
+
+## Direct API Access
+
+### Items API
+
+```ruby
+client = PlaypathRails.client
+
+# List all items
+items = client.list_items
+
+# Get specific item
+item = client.get_item(123)
+
+# Create new item
+item = client.create_item(
+  title: "Rugby Basics",
+  url: "https://example.com/rugby",
+  text: "Learn the fundamentals of rugby",
+  tags: ["rugby", "sports", "basics"]
+)
+
+# Update item
+client.update_item(123, title: "Updated Title")
+
+# Delete item
+client.delete_item(123)
+```
+
+### RAG Chat API
+
+```ruby
+# Chat with conversation history
+response = client.chat(
+  message: "What is rugby coaching?",
+  history: [
+    { role: "user", text: "Tell me about rugby" },
+    { role: "assistant", text: "Rugby is a contact sport..." }
+  ]
+)
+```
+
+## Error Handling
+
+The gem provides specific exception types for different error scenarios:
+
+```ruby
+begin
+  PlaypathRails::RAG.ask("What is rugby?")
+rescue PlaypathRails::AuthenticationError
+  # Invalid or missing API key
+rescue PlaypathRails::TrialLimitError
+  # Free plan limit exceeded
+rescue PlaypathRails::ValidationError => e
+  # Invalid request data
+  puts e.message
+rescue PlaypathRails::APIError => e
+  # General API error
+  puts "API Error: #{e.message} (Status: #{e.status_code})"
+end
+```
+
+## API Key Types
+
+- **Regular API Key** (`api_key`): Full access to all endpoints
+- **Embeddings API Key** (`embeddings_api_key`): Limited access, only works with RAG endpoints
+
+The gem automatically uses the appropriate key based on the endpoint being accessed.
 
 ## Development
 
