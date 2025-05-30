@@ -17,30 +17,6 @@ A Ruby on Rails gem that provides seamless integration between Rails application
 [![Gem Downloads](https://img.shields.io/gem/dt/playpath_rails.svg)](https://rubygems.org/gems/playpath_rails)
 [![Documentation](https://inch-ci.org/github/playpath/playpath_rails.svg?branch=main)](https://inch-ci.org/github/playpath/playpath_rails)
 
-### Quality Metrics
-
-- **Test Coverage**: Comprehensive RSpec test suite with >95% coverage
-- **Code Quality**: Maintained with RuboCop and CodeClimate analysis
-- **Security**: Regular security audits with Bundler Audit and Snyk
-- **Documentation**: Inline documentation with YARD and comprehensive README
-- **Dependencies**: Minimal runtime dependencies (ActiveRecord, ActiveSupport)
-- **Compatibility**: Supports Ruby 3.1+ and Rails 5.2-8.0
-
-## Table of Contents
-
-- [Features](#features)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Model Synchronization](#model-synchronization)
-- [RAG Chat API](#rag-chat-api)
-- [Direct API Access](#direct-api-access)
-- [Error Handling](#error-handling)
-- [API Key Types](#api-key-types)
-- [Development](#development)
-- [Project Statistics](#project-statistics)
-- [Contributing](#contributing)
-- [License](#license)
-
 ## Features
 
 - **Automatic Model Synchronization**: Sync ActiveRecord models to PlayPath.io Items API
@@ -200,6 +176,32 @@ response = client.chat(
   ]
 )
 ```
+
+## Controller Integration
+
+When building custom Rails API controllers that integrate with PlayPath.io, you may encounter parameter handling issues. The gem provides examples and documentation for proper integration.
+
+### Quick Fix for "Unpermitted Parameters" Warnings
+
+If you see warnings like `Unpermitted parameters: :format, :id, :item` in your Rails logs, update your controller's parameter handling:
+
+```ruby
+def item_params
+  # Handle both nested and flat parameter formats
+  if params[:item].present?
+    # Nested format: { item: { title: "...", text: "..." } }
+    params.require(:item).permit(:title, :url, :text, tags: [])
+  else
+    # Flat format: { title: "...", text: "..." }
+    params.permit(:title, :url, :text, tags: [])
+  end
+end
+```
+
+### Complete Examples
+
+- **Controller Example**: [`examples/items_controller_example.rb`](examples/items_controller_example.rb) - Complete Rails controller with proper parameter handling
+- **Integration Guide**: [`CONTROLLER_INTEGRATION.md`](CONTROLLER_INTEGRATION.md) - Detailed guide for Rails controller integration
 
 ## Error Handling
 

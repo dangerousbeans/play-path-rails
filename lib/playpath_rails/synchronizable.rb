@@ -59,7 +59,7 @@ module PlaypathRails
         true
       rescue PlaypathRails::Error => e
         # Log the error but don't raise it to avoid breaking the application
-        Rails.logger.error("PlayPath sync failed for #{self.class.name}##{id}: #{e.message}") if defined?(Rails)
+        # Rails.logger.error("PlayPath sync failed for #{self.class.name}##{id}: #{e.message}") if defined?(Rails)
         false
       end
     end
@@ -76,7 +76,7 @@ module PlaypathRails
         true
       rescue PlaypathRails::Error => e
         # Log the error but don't raise it to avoid breaking the application
-        Rails.logger.error("PlayPath delete failed for #{self.class.name}##{id}: #{e.message}") if defined?(Rails)
+        # Rails.logger.error("PlayPath delete failed for #{self.class.name}##{id}: #{e.message}") if defined?(Rails)
         false
       end
     end

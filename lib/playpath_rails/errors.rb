@@ -4,9 +4,6 @@ module PlaypathRails
   # Base error class for PlaypathRails
   class Error < StandardError; end
 
-  # Authentication error
-  class AuthenticationError < Error; end
-
   # API request error
   class APIError < Error
     attr_reader :status_code, :response_body
@@ -17,6 +14,9 @@ module PlaypathRails
       @response_body = response_body
     end
   end
+
+  # Authentication error
+  class AuthenticationError < APIError; end
 
   # Validation error from API
   class ValidationError < APIError; end

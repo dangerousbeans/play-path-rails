@@ -1,0 +1,6 @@
+class <%= migration_class_name %> < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  def change
+    add_column :<%= table_name %>, :playpath_item_id, :integer, null: true
+    add_index :<%= table_name %>, :playpath_item_id, unique: true
+  end
+end

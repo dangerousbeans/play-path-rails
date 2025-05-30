@@ -6,6 +6,13 @@ require_relative 'playpath_rails/client'
 require_relative 'playpath_rails/synchronizable'
 require_relative 'playpath_rails/rag'
 
+# Load railtie if Rails is available
+begin
+  require_relative 'playpath_rails/railtie' if defined?(Rails::Railtie)
+rescue LoadError
+  # Silently ignore if Rails is not available
+end
+
 module PlaypathRails
   class Error < StandardError; end
 
