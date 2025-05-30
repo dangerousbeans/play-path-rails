@@ -1,0 +1,48 @@
+AllCops:
+  TargetRubyVersion: 2.6
+  SuggestExtensions: false
+  NewCops: enable
+
+# Documentation is not always required for internal classes
+Style/Documentation:
+  Enabled: false
+
+# Spec files often have long blocks, and gemspec files need long blocks too
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - '*.gemspec'
+
+# Some methods in gems need to be longer for functionality
+Metrics/MethodLength:
+  Max: 35
+  Exclude:
+    - 'spec/**/*'
+
+# Complex methods are sometimes necessary in gems
+Metrics/CyclomaticComplexity:
+  Max: 20
+
+Metrics/PerceivedComplexity:
+  Max: 20
+
+Metrics/AbcSize:
+  Max: 55
+
+# Parameter lists can be longer for configuration methods
+Metrics/ParameterLists:
+  Max: 6
+
+# Allow constants in test blocks
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - 'spec/**/*'
+
+# Allow empty blocks in tests
+Lint/EmptyBlock:
+  Exclude:
+    - 'spec/**/*'
+
+# Disable gemspec development dependencies cop - it's fine to have them in gemspec
+Gemspec/DevelopmentDependencies:
+  Enabled: false

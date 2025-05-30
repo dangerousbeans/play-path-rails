@@ -7,7 +7,7 @@ require_relative '../lib/playpath_rails'
 # Configure the gem
 PlaypathRails.configure do |config|
   config.api_key = ENV['PLAYPATH_API_KEY'] || 'your_api_key_here'
-  config.embeddings_api_key = ENV['PLAYPATH_EMBEDDINGS_KEY'] # Optional
+  config.embeddings_api_key = ENV.fetch('PLAYPATH_EMBEDDINGS_KEY', nil) # Optional
   config.base_url = 'https://playpath.io'
 end
 
