@@ -13,7 +13,7 @@ RSpec.describe PlaypathRails::Generators::MigrationGenerator do
   before do
     # Mock ActiveRecord::Migration.current_version
     allow(ActiveRecord::Migration).to receive(:current_version).and_return(7.0)
-    
+
     # Create the db/migrate directory
     FileUtils.mkdir_p(File.join(destination_root, 'db', 'migrate'))
   end
@@ -29,17 +29,17 @@ RSpec.describe PlaypathRails::Generators::MigrationGenerator do
 
       it 'creates a migration file with correct name pattern' do
         generator.create_migration_file
-        
+
         migration_files = Dir[File.join(destination_root, 'db/migrate/*_add_playpath_item_id_to_articles.rb')]
         expect(migration_files).not_to be_empty
       end
 
       it 'generates correct migration content' do
         generator.create_migration_file
-        
+
         migration_file = Dir[File.join(destination_root, 'db/migrate/*_add_playpath_item_id_to_articles.rb')].first
         content = File.read(migration_file)
-        
+
         expect(content).to include('class AddPlaypathItemIdToArticles < ActiveRecord::Migration[7.0]')
         expect(content).to include('add_column :articles, :playpath_item_id, :integer, null: true')
         expect(content).to include('add_index :articles, :playpath_item_id, unique: true')
@@ -51,17 +51,17 @@ RSpec.describe PlaypathRails::Generators::MigrationGenerator do
 
       it 'creates a migration file with correct table name' do
         generator.create_migration_file
-        
+
         migration_files = Dir[File.join(destination_root, 'db/migrate/*_add_playpath_item_id_to_blog_posts.rb')]
         expect(migration_files).not_to be_empty
       end
 
       it 'generates correct migration class name and content' do
         generator.create_migration_file
-        
+
         migration_file = Dir[File.join(destination_root, 'db/migrate/*_add_playpath_item_id_to_blog_posts.rb')].first
         content = File.read(migration_file)
-        
+
         expect(content).to include('class AddPlaypathItemIdToBlogPosts < ActiveRecord::Migration[7.0]')
         expect(content).to include('add_column :blog_posts, :playpath_item_id, :integer, null: true')
         expect(content).to include('add_index :blog_posts, :playpath_item_id, unique: true')
@@ -73,17 +73,17 @@ RSpec.describe PlaypathRails::Generators::MigrationGenerator do
 
       it 'creates a migration file with correct table name' do
         generator.create_migration_file
-        
+
         migration_files = Dir[File.join(destination_root, 'db/migrate/*_add_playpath_item_id_to_user_profiles.rb')]
         expect(migration_files).not_to be_empty
       end
 
       it 'generates correct migration class name and content' do
         generator.create_migration_file
-        
+
         migration_file = Dir[File.join(destination_root, 'db/migrate/*_add_playpath_item_id_to_user_profiles.rb')].first
         content = File.read(migration_file)
-        
+
         expect(content).to include('class AddPlaypathItemIdToUserProfiles < ActiveRecord::Migration[7.0]')
         expect(content).to include('add_column :user_profiles, :playpath_item_id, :integer, null: true')
         expect(content).to include('add_index :user_profiles, :playpath_item_id, unique: true')
@@ -95,17 +95,17 @@ RSpec.describe PlaypathRails::Generators::MigrationGenerator do
 
       it 'creates a migration file with correct table name' do
         generator.create_migration_file
-        
+
         migration_files = Dir[File.join(destination_root, 'db/migrate/*_add_playpath_item_id_to_users.rb')]
         expect(migration_files).not_to be_empty
       end
 
       it 'generates correct migration class name and content' do
         generator.create_migration_file
-        
+
         migration_file = Dir[File.join(destination_root, 'db/migrate/*_add_playpath_item_id_to_users.rb')].first
         content = File.read(migration_file)
-        
+
         expect(content).to include('class AddPlaypathItemIdToUsers < ActiveRecord::Migration[7.0]')
         expect(content).to include('add_column :users, :playpath_item_id, :integer, null: true')
         expect(content).to include('add_index :users, :playpath_item_id, unique: true')

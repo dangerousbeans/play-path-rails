@@ -48,9 +48,7 @@ RSpec.describe 'Controller Integration' do
         keys.each do |key|
           if key.is_a?(Hash)
             key.each do |k, v|
-              if v.is_a?(Array) && @params[k].is_a?(Array)
-                permitted[k] = @params[k]
-              end
+              permitted[k] = @params[k] if v.is_a?(Array) && @params[k].is_a?(Array)
             end
           elsif @params.key?(key)
             permitted[key] = @params[key]
@@ -61,6 +59,7 @@ RSpec.describe 'Controller Integration' do
 
       def require(key)
         raise "param is missing or the value is empty: #{key}" unless @params.key?(key)
+
         MockParams.new(@params[key])
       end
 
@@ -85,7 +84,7 @@ RSpec.describe 'Controller Integration' do
           item: {
             title: 'Building Attack Structure',
             text: 'Our new contributor former Black Ferns...',
-            tags: ['rugby', 'coaching']
+            tags: %w[rugby coaching]
           },
           id: '2063',
           format: :json
@@ -98,7 +97,7 @@ RSpec.describe 'Controller Integration' do
 
         expect(result[:title]).to eq('Building Attack Structure')
         expect(result[:text]).to eq('Our new contributor former Black Ferns...')
-        expect(result[:tags]).to eq(['rugby', 'coaching'])
+        expect(result[:tags]).to eq(%w[rugby coaching])
       end
 
       it 'does not include unpermitted parameters' do
@@ -115,7 +114,7 @@ RSpec.describe 'Controller Integration' do
         {
           title: 'Building Attack Structure',
           text: 'Our new contributor former Black Ferns...',
-          tags: ['rugby', 'coaching'],
+          tags: %w[rugby coaching],
           id: '2063',
           format: :json
         }
@@ -127,7 +126,7 @@ RSpec.describe 'Controller Integration' do
 
         expect(result[:title]).to eq('Building Attack Structure')
         expect(result[:text]).to eq('Our new contributor former Black Ferns...')
-        expect(result[:tags]).to eq(['rugby', 'coaching'])
+        expect(result[:tags]).to eq(%w[rugby coaching])
       end
 
       it 'does not include unpermitted parameters' do
@@ -197,7 +196,7 @@ RSpec.describe 'Controller Integration' do
 
     it 'controller example contains proper parameter handling' do
       content = File.read('examples/items_controller_example.rb')
-      
+
       expect(content).to include('def item_params')
       expect(content).to include('if params[:item].present?')
       expect(content).to include('params.require(:item).permit')
